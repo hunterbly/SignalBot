@@ -14,3 +14,17 @@ get_os <- function(){
     os = Sys.info()["sysname"]
     return(os)
 }
+
+get_calendar <- function(){
+
+    ## Return some calendar object which handles weekends
+    ##
+    ## Args:
+    ##     None
+    ##
+    ## Returns:
+    ##     calendar
+
+    calendar <- bizdays::create.calendar(name = "calendarday", weekdays=c('saturday', 'sunday'))
+    return(calendar)
+}
