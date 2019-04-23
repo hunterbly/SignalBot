@@ -119,6 +119,19 @@ ui <- dashboardPage(
                     ),
                     fluidRow(),
                     row_bottom,
+
+                    fluidRow(
+                        box(
+                            title       = "Details",
+                            status      = "primary",
+                            width       = 12,
+                            solidHeader = TRUE,
+                            collapsible = TRUE,
+                            height      = 400,
+                            verbatimTextOutput("test_text", placeholder = TRUE)
+                        )
+                    ),
+
                     row_debug
                 )
             )
@@ -128,12 +141,6 @@ ui <- dashboardPage(
 # create the server functions for the dashboard
 server <- function(input, output, session) {
 
-    #some data manipulation to derive the values of KPI boxes
-    total.revenue <- sum(recommendation$Revenue)
-    sales.account <- recommendation %>% group_by(Account) %>% summarise(value = sum(Revenue)) %>% filter(value==max(value))
-    prof.prod <- recommendation %>% group_by(Product) %>% summarise(value = sum(Revenue)) %>% filter(value==max(value))
-
-
     #####################################
     ## Get Data                        ##
     #####################################
@@ -142,6 +149,9 @@ server <- function(input, output, session) {
         res
     })
 
+    #####################################
+    ## Value box at top                ##
+    #####################################
 
     output$box_success <- renderValueBox({
         valueBox(
@@ -171,14 +181,29 @@ server <- function(input, output, session) {
 
     })
 
-    #creating the plotOutput content
+    #####################################
+    ## Testing Components            ##
+    #####################################
 
+    # Test 1 - Test D3 bar chart
     output$test_group_totals <- renderD3({
 
-        res <- data.table::data.table(x = c(1:10), y = c(2:11))
+        res <- data.table::data.table(x = c(1:10),
+                                      # y = round(rnorm(10, mean = 0, sd = 5)/100, 2),
+                                      y = c(2:11),
+                                      z = c(3:12))
 
         r2d3(res, "col_plot.js")
     })
+
+    # Test 2 - Output text
+    output$test_text <- renderText({
+
+        #head(iris)
+        some_input = input$column_clicked
+        sprintf("You have selected this %s", some_input)
+    })
+
 
 
 }
