@@ -56,10 +56,14 @@ row_bottom <- fluidRow(
                        min = "2010-01-01",
                        max = "2018-12-31"),
 
-        radioButtons("dash_input_signal",
-                     label    = h3("Signal"),
-                     choices  = signal_radioButton_list,
-                     selected = "none")
+        selectInput(
+            inputId = "dash_input_signal",
+            label = "Signal",
+            choices = signal_radioButton_list,
+            selected = "none",
+            size = length(signal_radioButton_list),
+            selectize = FALSE
+        )
     ),
 
     box(
@@ -81,12 +85,42 @@ row_debug <- fluidRow(
     )
 )
 
-# combine the two fluid rows to make the body
-body <- dashboardBody(row_top, row_bottom, row_debug)
+ui <- dashboardPage(
 
-#completing the ui part with dashboardPage
-ui <- dashboardPage(title = 'Stock analysis dashboard', header, sidebar, body, skin='red')
+        dashboardHeader(
+            title = "Stock analysis",
+            titleWidth = 200
+        ),
 
+        dashboardSidebar(
+            sidebarMenu(
+                menuItem("Dashboard", tabName = "tab_dashboard", icon = icon("dashboard")),
+                menuItem("Signal"   , tabName = "tab_signal"   , icon = icon("cog", lib = "glyphicon")),
+                menuItem("Stock"    , tabName = "tab_stock"    , icon = icon("bar-chart-o")),
+                menuItem("Option"   , tabName = "tab_option"   , icon = icon("list-alt"))
+            )
+        ),
+
+        # dashboardBody(row_top, row_bottom, row_debug)
+        dashboardBody(
+            tabsetPanel(
+                id = "main_tabs",
+                tabPanel(
+                    title = "Main Dashboard",
+                    value = "tab_dashboard",
+                    fluidRow(
+                        valueBoxOutput("box_success"),
+                        valueBoxOutput("box_fail"),
+                        valueBoxOutput("box_score")
+                    ),
+                    fluidRow(),
+                    row_bottom,
+                    row_debug
+                )
+            )
+        )
+
+)
 # create the server functions for the dashboard
 server <- function(input, output, session) {
 
@@ -96,7 +130,15 @@ server <- function(input, output, session) {
     prof.prod <- recommendation %>% group_by(Product) %>% summarise(value = sum(Revenue)) %>% filter(value==max(value))
 
 
-    #creating the valueBoxOutput content
+    #####################################
+    ## Get Data                        ##
+    #####################################
+    base_data <- reactive({
+        res <- iris
+        res
+    })
+
+
     output$box_success <- renderValueBox({
         valueBox(
             formatC(23, format="d", big.mark=','),
