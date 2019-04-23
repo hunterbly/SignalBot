@@ -3,6 +3,8 @@ library(shiny)
 require(shinydashboard)
 library(ggplot2)
 library(dplyr)
+library(r2d3)
+library(nycflights13)
 
 
 #####################################
@@ -72,8 +74,10 @@ row_bottom <- fluidRow(
         width       = 8,
         solidHeader = TRUE,
         collapsible = TRUE,
-        plotOutput("dash_output_graph", height = "600px")
+        #plotOutput("dash_output_graph", height = "600px")
+        d3Output("test_group_totals")
     )
+
 
 )
 
@@ -169,25 +173,12 @@ server <- function(input, output, session) {
 
     #creating the plotOutput content
 
-    output$revenuebyPrd <- renderPlot({
-        ggplot(data = recommendation,
-               aes(x=Product, y=Revenue, fill=factor(Region))) +
-            geom_bar(position = "dodge", stat = "identity") + ylab("Revenue (in Euros)") +
-            xlab("Product") + theme(legend.position="bottom"
-                                    ,plot.title = element_text(size=15, face="bold")) +
-            ggtitle("Revenue by Product") + labs(fill = "Region")
+    output$test_group_totals <- renderD3({
+
+        res <- data.table::data.table(x = c(1:10), y = c(2:11))
+
+        r2d3(res, "col_plot.js")
     })
-
-
-    output$revenuebyRegion <- renderPlot({
-        ggplot(data = recommendation,
-               aes(x=Account, y=Revenue, fill=factor(Region))) +
-            geom_bar(position = "dodge", stat = "identity") + ylab("Revenue (in Euros)") +
-            xlab("Account") + theme(legend.position="bottom"
-                                    ,plot.title = element_text(size=15, face="bold")) +
-            ggtitle("Revenue by Region") + labs(fill = "Region")
-    })
-
 
 
 }
